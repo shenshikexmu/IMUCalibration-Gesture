@@ -1,5 +1,7 @@
 function [Tg,Kg]=ICRA_2014_gyro(rotation,a0)
-
+% conference: A Robust and Easy to implement method for imu
+% calibration without External Equipments
+% author  Zhang Xin
 
 if nargin<2 
    a0=[0,0,0,0,0,0,0.001,0.001,0.001];

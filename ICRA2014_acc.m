@@ -1,5 +1,7 @@
 function [Ta,Ka,Ba,axis]=ICRA2014_acc(fix_point,a0)
-
+% conference: A Robust and Easy to implement method for imu
+% calibration without External Equipments
+% author  Zhang Xin
 
 if nargin<2 
    a0=[0,0,0,0.0048,0.0048,0.0048,0,0,0];
