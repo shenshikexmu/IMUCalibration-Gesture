@@ -1,5 +1,6 @@
 function [Tm2a,Bm,Vm]=mag2acc_matrix(fix_point,Ta,Ka,Ba,a0)
 
+% author  Zhang Xin
 
 if nargin==4 
    a0=[1,1,1,1,1,1,1,1,0,0,0];

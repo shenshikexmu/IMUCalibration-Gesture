@@ -26,6 +26,6 @@ rotation{n+4}=Bg;
 
 [Tm2a,Bm,Vm]=mag2acc_matrix(fix_point,Ta,Ka,Ba);
 
-
+See_Gesture( data,Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm);
 
 end

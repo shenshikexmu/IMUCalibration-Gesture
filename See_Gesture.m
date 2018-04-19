@@ -2,7 +2,7 @@ function See_Gesture( data,Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm)
 % show the gesture of sensor, compare different algorithm
 % data is raw data ;  
 % Vm is mag vector in world frame
-
+% author  Zhang Xin
 
 m=size(data,1);
 
@@ -10,101 +10,81 @@ m=size(data,1);
 t(1)=0;
 
 for i=1:m
-     data(i,2:4)=(data(i,2:4)-A')./APP;
-     data(i,5:7)=(data(i,5:7)-G)./[16.4,16.4,16.4];
-     data(i,8:10)=(data(i,8:10)-M');
-     
-     norm_g(i)=norm(data(i,5:7));
+    
+     data(i,2:4)=(Ta*Ka*(data(i,2:4)'+Ba))';
+     data(i,5:7)=(Tg*Kg*(data(i,5:7)'+Bg))';
+     data(i,8:10)=(Tm2a*(data(i,8:10)'+Bm))';
+    
      norm_a(i)=norm(data(i,2:4));
+     norm_g(i)=norm(data(i,5:7));
+     
      if i>1
          t(i)=data(i,1)-data(i-1,1);
-         if abs(t(i))>1000
-            t(i)=10;
-         end
      end
-    if norm_g(i)<5
-        q(i,1)=1;
-        q(i,2:4)=0;
+    if norm_g(i)<0.0873    %5*pi/180
+        q(i,:)=[1,0,0,0];
     else
-        P=norm_g(i);
-        q(i,1:4) = axisAngle2quatern([data(i,5)/P,data(i,6)/P,data(i,7)/P]...
-            ,  (P*pi*t(i))/(1000*180));
-        
+        q(i,:) = axisAngle2quatern(data(i,5:7)/norm_g(i), norm_g(i)*t(i));
     end
-    if i==1
-        
-        Q(i,:)  = accMeg2qRichard(data(i,:),Mag_R);
+    if i==1 
+        Q(i,:)  = accMeg2qRichard(data(i,:));
         
         QfuseHL(i,:)=Q(i,:);           %high low pass filter
         QfuseEKF(i,:)=Q(i,:);          % EKF filter
-        QfuseMahony(i,:)=Q(i,:);          % Mahony filter
- %       QfuseMahony1D(i,:)=Q(i,:); 
+        QfuseMahony(i,:)=Q(i,:);          % Mahony filter 
     else
         Q(i,:)=quaternProd(Q(i-1,:),q(i,:));    %Q(i-1,:)*q(i,:)
         
-  %      tic;
-        QfuseHL(i,:)=HighLowPassFilter(QfuseHL(i-1,:),data(i,:),t(i),Mag_R);
- %       t1=t1+toc;
-        if i==2
-            
-            [QfuseEKF(i,:),Pk]=EkfFilter2(QfuseEKF(i-1,:),data(i,:),t(i),Mag_R,Mag_V);
-            [QfuseMahony(i,:),eInt]=MahonyFilter2(QfuseMahony(i-1,:),data(i,:),t(i),Mag_R,Mag_V);
-%             [QfuseEKF(i,:),Pk]=EkfFilter2(QfuseEKF(i-1,:),data(i,:),t(i),Mag_R);
-%             [QfuseMahony(i,:),eInt]=MahonyFilter2(QfuseMahony(i-1,:),data(i,:),t(i),Mag_R);
+        QfuseHL(i,:)=HighLowPassFilter(QfuseHL(i-1,:),data(i,:),t(i));
+        if i==2     
+            [QfuseEKF(i,:),Pk]=EkfFilter(QfuseEKF(i-1,:),data(i,:),t(i),Vm);
+            [QfuseMahony(i,:),eInt]=MahonyFilter(QfuseMahony(i-1,:),data(i,:),t(i),Vm);
         else
-        %    tic;
-            [QfuseEKF(i,:),Pk]=EkfFilter2(QfuseEKF(i-1,:),data(i,:),t(i),Mag_R,Mag_V,Pk);
-           % [QfuseEKF(i,:),Pk]=EkfFilter2(QfuseEKF(i-1,:),data(i,:),t(i),Mag_R,Pk);
-%             t2=t2+toc;
-%             tic
-            [QfuseMahony(i,:),eInt]=MahonyFilter2(QfuseMahony(i-1,:),data(i,:),t(i),Mag_R,Mag_V,eInt);
-        %    [QfuseMahony(i,:),eInt]=MahonyFilter2(QfuseMahony(i-1,:),data(i,:),t(i),Mag_R,eInt);
-%             t3=t3+toc;          
+            [QfuseEKF(i,:),Pk]=EkfFilter(QfuseEKF(i-1,:),data(i,:),t(i),Vm,Pk);
+            [QfuseMahony(i,:),eInt]=MahonyFilter(QfuseMahony(i-1,:),data(i,:),t(i),Vm,eInt);  
         end
-
     end
- 
 end
-figure(3)
-p1(1)=subplot(5,1,1);
+figure(1)
+p1(1)=subplot(6,1,1);
 plot(1:m,QfuseHL(:,1),'r',1:m,QfuseEKF(:,1),'g', 1:m,QfuseMahony(:,1),'b',1:m,Q(:,1),'m');
 ylim([-1,1]);
-legend('HLP','EKF','Mahony','original');
+legend('HLP','EKF','Mahony','only gyro');
 
-p1(2)=subplot(5,1,2);
+p1(2)=subplot(6,1,2);
 plot(1:m,QfuseHL(:,2),'r',1:m,QfuseEKF(:,2),'g', 1:m,QfuseMahony(:,2),'b',1:m,Q(:,2),'m');
 ylim([-1,1]);
 
-p1(3)=subplot(5,1,3);
+p1(3)=subplot(6,1,3);
 plot(1:m,QfuseHL(:,3),'r',1:m,QfuseEKF(:,3),'g', 1:m,QfuseMahony(:,3),'b',1:m,Q(:,3),'m');
 ylim([-1,1]);
 
-p1(4)=subplot(5,1,4);
+p1(4)=subplot(6,1,4);
 plot(1:m,QfuseHL(:,4),'r',1:m,QfuseEKF(:,4),'g', 1:m,QfuseMahony(:,4),'b',1:m,Q(:,4),'m');
 ylim([-1,1]);
 
-p1(5)=subplot(5,1,5);
+p1(5)=subplot(6,1,5);
 plot(1:m,norm_g);
+
+p1(6)=subplot(6,1,6);
+plot(1:m,norm_a);
 linkaxes(p1,'x');
 
-% figure(4)
-% plot(1:m,norm_a);
 
 
 figure('NumberTitle', 'off', 'Name', 'sensor attitude ');
 set(gcf, 'doublebuffer', 'on');
 % writerObj=VideoWriter('J:\out.avi');
 % open(writerObj);
-for i = 1:20:m       %show sensor attitude
+for i = 1:10:m       %show sensor attitude
 
-    R=quatern2rotMat(Q(i,:));             % gyro attitude
-    RR=accMag2rotMat(data(i,:),Mag_R);    % acc & mag  attitude
-
+    R=quatern2rotMat(Q(i,:));             % only gyro attitude
+    RR=accMag2rotMat(data(i,:));          % acc & mag  attitude
     RRR=quatern2rotMat(QfuseHL(i,:));     % high low pass filter attitude
     RRRR=quatern2rotMat(QfuseEKF(i,:));   % EKF filter attitude
     RRRRR=quatern2rotMat(QfuseMahony(i,:));   % Mahony filter attitude
 
-   accW=accWorldframe(RRRRR,data(i,:));
+    accW=accWorldframe(RRRRR,data(i,:));   %acceleration in world coordinata
    
    
     r1=R(1,:);                            % x axis coordinate
@@ -122,45 +102,46 @@ for i = 1:20:m       %show sensor attitude
     r5=RRRRR(1,:);        
     g5=RRRRR(2,:);
     b5=RRRRR(3,:);
-%     r6=RRRRRR(1,:);        
-%     g6=RRRRRR(2,:);
-%     b6=RRRRRR(3,:);
-
     
-    plot3([-2,r1(1)-2],[0,r1(2)],[0,r1(3)],'r',...
-        [-2,g1(1)-2],[0,g1(2)],[0,g1(3)],'g',...
-        [-2,b1(1)-2],[0,b1(2)],[0,b1(3)],'b',...
+    plot3([-3,r1(1)-3],[0,r1(2)],[0,r1(3)],'r',...
+        [-3,g1(1)-3],[0,g1(2)],[0,g1(3)],'g',...
+        [-3,b1(1)-3],[0,b1(2)],[0,b1(3)],'b',...
         ...
         [0,r2(1)],[0,r2(2)],[0,r2(3)],'r',...
         [0,g2(1)],[0,g2(2)],[0,g2(3)],'g',...
         [0,b2(1)],[0,b2(2)],[0,b2(3)],'b',...
         ...
-        [2,r3(1)+2],[0,r3(2)],[0,r3(3)],'r',...
-        [2,g3(1)+2],[0,g3(2)],[0,g3(3)],'g',...
-        [2,b3(1)+2],[0,b3(2)],[0,b3(3)],'b',...
+        [3,r3(1)+3],[0,r3(2)],[0,r3(3)],'r',...
+        [3,g3(1)+3],[0,g3(2)],[0,g3(3)],'g',...
+        [3,b3(1)+3],[0,b3(2)],[0,b3(3)],'b',...
         ...
-        [4,r4(1)+4],[0,r4(2)],[0,r4(3)],'r',...
-        [4,g4(1)+4],[0,g4(2)],[0,g4(3)],'g',...
-        [4,b4(1)+4],[0,b4(2)],[0,b4(3)],'b',...
+        [6,r4(1)+6],[0,r4(2)],[0,r4(3)],'r',...
+        [6,g4(1)+6],[0,g4(2)],[0,g4(3)],'g',...
+        [6,b4(1)+6],[0,b4(2)],[0,b4(3)],'b',...
         ...
-        [6,r5(1)+6],[0,r5(2)],[0,r5(3)],'r',...
-        [6,g5(1)+6],[0,g5(2)],[0,g5(3)],'g',...
-        [6,b5(1)+6],[0,b5(2)],[0,b5(3)],'b',...
+        [9,r5(1)+9],[0,r5(2)],[0,r5(3)],'r',...
+        [9,g5(1)+9],[0,g5(2)],[0,g5(3)],'g',...
+        [9,b5(1)+9],[0,b5(2)],[0,b5(3)],'b',...
         ...
-        [10,accW(1)+10],[0,0],[0,0],'r',...
-        [10,10],[0,accW(2)],[0,0],'g',...
-        [10,10],[0,0],[0,accW(3)],'b');
+        [13,accW(1)+13],[0,0],[0,0],'r',...
+        [13,13],[0,accW(2)],[0,0],'g',...
+        [13,13],[0,0],[0,accW(3)],'b');
     axis equal
-    set(gca,'XLim',[-3.5 11.5]);
-    set(gca,'YLim',[-1.5 1.5]);
-    set(gca,'ZLim',[-1.5 1.5]);
+    set(gca,'XLim',[-5 15]);
+    set(gca,'YLim',[-2.5 2.5]);
+    set(gca,'ZLim',[-2.5 2.5]);
     
     xlabel('X');  
     ylabel('Y');  
     zlabel('Z');  
-    title(['i=' num2str(i)]) ;
- 
     
+    title(['i=' num2str(i)]);
+    text(-5,0,4,'only gyro ');
+    text(-2,0,4,'acc & mag ');
+    text(1,0,4,'highlow pass ');
+    text(5,0,4,'EKF ');
+    text(7,0,4,'Mahony ');
+    text(10,0,4,'acc in world ');
     drawnow
     
 %     %%%%
@@ -210,10 +191,10 @@ end
 
 
 
-function q = accMeg2qRichard(data,Mag_R)
+function q = accMeg2qRichard(data)
 
 
-vX=cross(data(1,8:10)*Mag_R',data(1,2:4));
+vX=cross(data(1,8:10),data(1,2:4));
 vX=vX/norm(vX);
 vY=cross(data(1,2:4),vX);
 vY=vY/norm(vY);
@@ -278,20 +259,20 @@ end
 
 
 
-function [R]=accMag2rotMat(data,Mag_R)
+function [R]=accMag2rotMat(data)
 
-VerticalX=cross(data(1,8:10)*Mag_R',data(1,2:4));
+VerticalX=cross(data(1,8:10),data(1,2:4));
 VerticalX=VerticalX/norm(VerticalX);
 VerticalY=cross(data(1,2:4),VerticalX);
 VerticalY=VerticalY/norm(VerticalY);
 VerticalZ=data(1,2:4)/norm(data(1,2:4));
-R=[VerticalX',VerticalY',VerticalZ'];   %��ͨ�Ӽ��ٶ���ת����
-% VerticalZ'����ֱ����
+R=[VerticalX',VerticalY',VerticalZ'];   
+
 end
 
 function [accW]=accWorldframe(R,data)
-%��ʾ���������ϵ�µĴ������ܵļ��ٶ\EF\BF?
-accW=R'*data(1,2:4)'-[0;0;1];
+
+accW=(R'*data(1,2:4)'-[0;0;9.8])/9.8;
 
 
 end

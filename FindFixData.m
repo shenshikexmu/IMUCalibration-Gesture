@@ -1,5 +1,7 @@
 function [PP,fix_point,rotation]=FindFixData(cal,threshold)
 
+% author  Zhang Xin
+
 n=size(cal,1);
 j=1;
 for i=1:n
