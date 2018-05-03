@@ -1,4 +1,5 @@
 
+0.相关博客：https://blog.csdn.net/shenshikexmu/article/details/80013444
 
 
 1.读入数据，calfata.mat
@@ -27,3 +28,4 @@
    high loe pass:
    high and low pass filter to Gyro atitude with Accelerate & Magnetic
    
+

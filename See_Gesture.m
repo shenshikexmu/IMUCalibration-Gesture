@@ -76,7 +76,7 @@ figure('NumberTitle', 'off', 'Name', 'sensor attitude ');
 set(gcf, 'doublebuffer', 'on');
 % writerObj=VideoWriter('J:\out.avi');
 % open(writerObj);
-for i = 1:10:m       %show sensor attitude
+for i = 1:40:m       %show sensor attitude
 
     R=quatern2rotMat(Q(i,:));             % only gyro attitude
     RR=accMag2rotMat(data(i,:));          % acc & mag  attitude
