@@ -1,4 +1,4 @@
-function [Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm]=ImuCalibration_Gesture(data)
+function [Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm,mag_strength]=ImuCalibration_Gesture(data)
 % input data raw IMU data from mpu9250 
 % data :time accelerometer  gyroscope   magnetometer 
 %  cal_acc=Ta*Ka*(raw_acc+Ba)
@@ -23,8 +23,9 @@ rotation{n+4}=Bg;
 
 [Tg,Kg]=ICRA_2014_gyro(rotation);
 
+%[Tm2a,Bm,Vm]=mag2acc_matrix(fix_point,Ta,Ka,Ba);
 
-[Tm2a,Bm,Vm]=mag2acc_matrix(fix_point,Ta,Ka,Ba);
+[Tm2a,Bm,Vm,mag_strength]=Cal_mag4acc_frame(rotation,fix_point,Tg,Kg);
 
 See_Gesture( data,Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm);
 
