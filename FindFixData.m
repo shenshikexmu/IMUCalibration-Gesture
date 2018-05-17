@@ -11,10 +11,10 @@ for i=1:n
             P(j,1)=i;
         end
     else
-        if norm_gyro(i)<threshold&&norm_gyro(i-1)>threshold
+        if norm_gyro(i)<=threshold&&norm_gyro(i-1)>threshold
             P(j,1)=i;
         end
-        if norm_gyro(i)>threshold&&norm_gyro(i-1)<threshold
+        if norm_gyro(i)>threshold&&norm_gyro(i-1)<=threshold
             P(j,2)=i-1;
             j=j+1;
         end
