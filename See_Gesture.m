@@ -27,13 +27,17 @@ for i=1:m
         q(i,:) = axisAngle2quatern(data(i,5:7)/norm_g(i), norm_g(i)*t(i));
     end
     if i==1 
-        Q(i,:)  = accMeg2qRichard(data(i,:));
+        Q(i,:)  = accMeg2qRichard(data(i,:));  % only gyro
         
+        Q_RK4(i,:)=Q(i,:);             % only gyro in using RK4 updata
         QfuseHL(i,:)=Q(i,:);           %high low pass filter
         QfuseEKF(i,:)=Q(i,:);          % EKF filter
         QfuseMahony(i,:)=Q(i,:);          % Mahony filter 
     else
         Q(i,:)=quaternProd(Q(i-1,:),q(i,:));    %Q(i-1,:)*q(i,:)
+        
+        dt=(data(i,1)-data(i-1,1));
+        Q_RK4(i,:)=attitude_update_RK4(Q_RK4(i-1,:)',dt,data(i-1,5:7)',data(i,5:7)')';
         
         QfuseHL(i,:)=HighLowPassFilter(QfuseHL(i-1,:),data(i,:),t(i));
         if i==2     
@@ -47,20 +51,20 @@ for i=1:m
 end
 figure(1)
 p1(1)=subplot(6,1,1);
-plot(1:m,QfuseHL(:,1),'r',1:m,QfuseEKF(:,1),'g', 1:m,QfuseMahony(:,1),'b',1:m,Q(:,1),'m');
+plot(1:m,QfuseHL(:,1),'r',1:m,QfuseEKF(:,1),'g', 1:m,QfuseMahony(:,1),'b',1:m,Q(:,1),'m',1:m,Q_RK4(:,1),'c');
 ylim([-1,1]);
-legend('HLP','EKF','Mahony','only gyro');
+legend('HLP','EKF','Mahony','only gyro','gyro in RK4');
 
 p1(2)=subplot(6,1,2);
-plot(1:m,QfuseHL(:,2),'r',1:m,QfuseEKF(:,2),'g', 1:m,QfuseMahony(:,2),'b',1:m,Q(:,2),'m');
+plot(1:m,QfuseHL(:,2),'r',1:m,QfuseEKF(:,2),'g', 1:m,QfuseMahony(:,2),'b',1:m,Q(:,2),'m',1:m,Q_RK4(:,2),'c');
 ylim([-1,1]);
 
 p1(3)=subplot(6,1,3);
-plot(1:m,QfuseHL(:,3),'r',1:m,QfuseEKF(:,3),'g', 1:m,QfuseMahony(:,3),'b',1:m,Q(:,3),'m');
+plot(1:m,QfuseHL(:,3),'r',1:m,QfuseEKF(:,3),'g', 1:m,QfuseMahony(:,3),'b',1:m,Q(:,3),'m',1:m,Q_RK4(:,3),'c');
 ylim([-1,1]);
 
 p1(4)=subplot(6,1,4);
-plot(1:m,QfuseHL(:,4),'r',1:m,QfuseEKF(:,4),'g', 1:m,QfuseMahony(:,4),'b',1:m,Q(:,4),'m');
+plot(1:m,QfuseHL(:,4),'r',1:m,QfuseEKF(:,4),'g', 1:m,QfuseMahony(:,4),'b',1:m,Q(:,4),'m',1:m,Q_RK4(:,4),'c');
 ylim([-1,1]);
 
 p1(5)=subplot(6,1,5);
@@ -77,8 +81,9 @@ set(gcf, 'doublebuffer', 'on');
 % writerObj=VideoWriter('J:\out.avi');
 % open(writerObj);
 for i = 1:40:m       %show sensor attitude
-
-    R=quatern2rotMat(Q(i,:));             % only gyro attitude
+   
+    R0=quatern2rotMat(Q(i,:));                 % only gyro attitude
+    R=quatern2rotMat(Q_RK4(i,:));             % only gyro attitude in using RK4 updata
     RR=accMag2rotMat(data(i,:));          % acc & mag  attitude
     RRR=quatern2rotMat(QfuseHL(i,:));     % high low pass filter attitude
     RRRR=quatern2rotMat(QfuseEKF(i,:));   % EKF filter attitude
@@ -86,8 +91,10 @@ for i = 1:40:m       %show sensor attitude
 
     accW=accWorldframe(RRRRR,data(i,:));   %acceleration in world coordinata
    
-   
-    r1=R(1,:);                            % x axis coordinate
+    r0=R0(1,:);                            % x axis coordinate
+    g0=R0(2,:);
+    b0=R0(3,:);
+    r1=R(1,:);                          
     g1=R(2,:);
     b1=R(3,:);
     r2=RR(1,:);        
@@ -103,7 +110,11 @@ for i = 1:40:m       %show sensor attitude
     g5=RRRRR(2,:);
     b5=RRRRR(3,:);
     
-    plot3([-3,r1(1)-3],[0,r1(2)],[0,r1(3)],'r',...
+    plot3([-6,r0(1)-6],[0,r0(2)],[0,r0(3)],'r',...
+        [-6,g0(1)-6],[0,g0(2)],[0,g0(3)],'g',...
+        [-6,b0(1)-6],[0,b0(2)],[0,b0(3)],'b',...
+        ...
+        [-3,r1(1)-3],[0,r1(2)],[0,r1(3)],'r',...
         [-3,g1(1)-3],[0,g1(2)],[0,g1(3)],'g',...
         [-3,b1(1)-3],[0,b1(2)],[0,b1(3)],'b',...
         ...
@@ -127,7 +138,7 @@ for i = 1:40:m       %show sensor attitude
         [13,13],[0,accW(2)],[0,0],'g',...
         [13,13],[0,0],[0,accW(3)],'b');
     axis equal
-    set(gca,'XLim',[-5 15]);
+    set(gca,'XLim',[-8 15]);
     set(gca,'YLim',[-2.5 2.5]);
     set(gca,'ZLim',[-2.5 2.5]);
     
@@ -136,8 +147,9 @@ for i = 1:40:m       %show sensor attitude
     zlabel('Z');  
     
     title(['i=' num2str(i)]);
-    text(-5,0,4,'only gyro ');
-    text(-2,0,4,'acc & mag ');
+    text(-9,0,4,'only gyro ');
+    text(-6.5,0,4,'gyro in RK4 ');
+    text(-3,0,4,'acc & mag ');
     text(1,0,4,'highlow pass ');
     text(5,0,4,'EKF ');
     text(7,0,4,'Mahony ');
@@ -277,3 +289,41 @@ accW=(R'*data(1,2:4)'-[0;0;9.8])/9.8;
 
 end
 
+
+function [Qk_plus1]=attitude_update_RK4(Qk,dt,gyro0,gyro1)
+% RK4
+% conference: A Robust and Easy to implement method for imu
+% calibration without External Equipments
+
+q_1=Qk;
+k1=(1/2)*omegaMatrix(gyro0)*q_1;
+q_2=Qk+dt*(1/2)*k1;
+k2=(1/2)*omegaMatrix((1/2)*(gyro0+gyro1))*q_2;
+q_3=Qk+dt*(1/2)*k2;
+k3=(1/2)*omegaMatrix((1/2)*(gyro0+gyro1))*q_3;
+q_4=Qk+dt*k3;
+k4=(1/2)*omegaMatrix(gyro1)*q_4;
+Qk_plus1=Qk+dt*(k1/6+k2/3+k3/3+k4/6);
+Qk_plus1=Qk_plus1/norm(Qk_plus1);
+
+if Qk_plus1(1)<0
+    Qk_plus1=-Qk_plus1;
+end
+
+end
+
+function [omega]=omegaMatrix(data)
+
+% wx=data(1)*pi/180;
+% wy=data(2)*pi/180;
+% wz=data(3)*pi/180;
+wx=data(1);
+wy=data(2);
+wz=data(3);
+
+omega=[0  , -wx , -wy , -wz ;...
+       wx ,  0  ,  wz , -wy ;...
+       wy , -wz ,  0  ,  wx ;...
+       wz ,  wy , -wx ,  0   ];
+
+end

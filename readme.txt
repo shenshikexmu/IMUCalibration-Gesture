@@ -26,7 +26,7 @@
    EKF:
    derivation <A Double-Stage Kalman Filter for Orientation Tracking with 
                an Integrated Processor in 9-D IMU>
-   high loe pass:
+   high low pass:
    high and low pass filter to Gyro atitude with Accelerate & Magnetic
    
 
