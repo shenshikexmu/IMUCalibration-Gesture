@@ -2,7 +2,7 @@ function [Qfuse2]=HighLowPassFilter(Qfuse1,ImuData,t)
 %high and low pass filter to Gyro atitude with Accelerate & Magnetic
 % author  Zhang Xin
 
-a=0.1;
+a=0.01;
 norm_g=norm(ImuData(1,5:7));
 norm_a=norm(ImuData(1,2:4));
 if norm_g<0.0873    %5*pi/180    

@@ -5,14 +5,15 @@ function [Q2,Pk2]=EkfFilter(Q1,ImuData,t,Vm,Pk1)
 % author  Zhang Xin
 
 if nargin<6
-   Pk1=[ 0.2 , 0.1 , 0.1 , 0.1;...
-           0.1 , 0.2 , 0.1 , 0.1;...
-           0.1 , 0.1 , 0.2 , 0.1;...
-           0.1 , 0.1 , 0.1 , 0.2  ];
+   Pk1=[ 0.1 , 0.01 , 0.01 , 0.01;...
+           0.01 , 0.1 , 0.01 , 0.01;...
+           0.01 , 0.01 , 0.1 , 0.01;...
+           0.01 , 0.01 , 0.01 , 0.1  ]*0.001;
+       
 end
-para1=0.001;%0.0001;
-para2=2;
-para3=3;
+para1=0.0001;%0.0001;
+para2=1;
+para3=2;
 Qk=para1*eye(4);   
 Rk1=para2*eye(3);
 Rk2=para3*eye(3);
@@ -33,6 +34,7 @@ Ak=[ 1    , -wx/2 , -wy/2 , -wz/2 ;...
 
 Qp=Ak*Q1';     %Q_predict
 
+Qp=Qp/norm(Qp);
 
 %R = quatern2rotMat(Qp);
 R2=[2*Qp(2)*Qp(3)+2*Qp(1)*Qp(4);...
@@ -76,6 +78,7 @@ if abs(norm_a-9.8)<2 && norm_g< 2
 
     qe2=Kk2*(mag'-h2);       % mag difference value bwtween real & prediction from attitude
     Pk2=(eye(4)-Kk2*Hk2)*Pk_1;
+    
 else
     qe1=[0;0;0;0];
     Pk_1=P_k;

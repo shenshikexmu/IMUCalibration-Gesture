@@ -36,8 +36,8 @@ for i=1:m
     else
         Q(i,:)=quaternProd(Q(i-1,:),q(i,:));    %Q(i-1,:)*q(i,:)
         
-        dt=(data(i,1)-data(i-1,1));
-        Q_RK4(i,:)=attitude_update_RK4(Q_RK4(i-1,:)',dt,data(i-1,5:7)',data(i,5:7)')';
+        
+        Q_RK4(i,:)=attitude_update_RK4(Q_RK4(i-1,:)',t(i),data(i-1,5:7)',data(i,5:7)')';
         
         QfuseHL(i,:)=HighLowPassFilter(QfuseHL(i-1,:),data(i,:),t(i));
         if i==2     
@@ -47,6 +47,7 @@ for i=1:m
             [QfuseEKF(i,:),Pk]=EkfFilter(QfuseEKF(i-1,:),data(i,:),t(i),Vm,Pk);
             [QfuseMahony(i,:),eInt]=MahonyFilter(QfuseMahony(i-1,:),data(i,:),t(i),Vm,eInt);  
         end
+        
     end
 end
 figure(1)
