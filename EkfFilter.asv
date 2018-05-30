@@ -36,7 +36,6 @@ Qp=Ak*Q1';     %Q_predict
 
 Qp=Qp/norm(Qp);
 
-P_k=Ak*Pk1*Ak'+Qk;
 
 if abs(norm_a-9.8)<2 && norm_g< 2
     %R = quatern2rotMat(Qp);
@@ -62,6 +61,8 @@ if abs(norm_a-9.8)<2 && norm_g< 2
 
     Hk1=J3;
     Hk2=Vm(2)*J2+Vm(3)*J3;
+
+    P_k=Ak*Pk1*Ak'+Qk;
 
     Kk1=P_k*Hk1'*inv(Hk1*P_k*Hk1'+Rk1);
 
