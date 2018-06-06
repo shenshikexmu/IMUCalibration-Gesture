@@ -12,8 +12,8 @@ if nargin<6
        
 end
 para1=0.0001;%0.0001;
-para2=1;
-para3=2;
+para2=0.1;
+para3=0.5;
 Qk=para1*eye(4);   
 Rk1=para2*eye(3);
 Rk2=para3*eye(3);
