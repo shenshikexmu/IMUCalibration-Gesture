@@ -243,9 +243,10 @@ nv = v/norm(v);
 
 if (u*v' == -1)
     q = [0, [1,0,0]];
-end
+else
     half = (nu + nv)/norm(nu + nv);
     q = [nu*half',cross(nu, half)];
+end
 end
 
 function [vector]=qMultiVec(vec,q)  %sensor frame to world frame
