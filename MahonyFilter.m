@@ -9,7 +9,7 @@ if isempty(eInt)
 end
 
 Kp=0.0015;  %0.175;
-Ki=0.0001; %     0.001;
+Ki=0.000001; %     0.001;
 
 wx=ImuData(1,5)*t;
 wy=ImuData(1,6)*t;
