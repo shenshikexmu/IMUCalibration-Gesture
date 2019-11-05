@@ -8,6 +8,8 @@ m=size(data,1);
 
 %====================================================
 t(1)=0;
+Pk=[];
+eInt=[];
 
 for i=1:m
     
@@ -35,21 +37,17 @@ for i=1:m
         QfuseMahony(i,:)=Q(i,:);          % Mahony filter 
     else
         Q(i,:)=quaternProd(Q(i-1,:),q(i,:));    %Q(i-1,:)*q(i,:)
-        
-        
+               
         Q_RK4(i,:)=attitude_update_RK4(Q_RK4(i-1,:)',t(i),data(i-1,5:7)',data(i,5:7)')';
         
         QfuseHL(i,:)=HighLowPassFilter(QfuseHL(i-1,:),data(i,:),t(i));
-        if i==2     
-            [QfuseEKF(i,:),Pk]=EkfFilter(QfuseEKF(i-1,:),data(i,:),t(i),Vm);
-            [QfuseMahony(i,:),eInt]=MahonyFilter(QfuseMahony(i-1,:),data(i,:),t(i),Vm);
-        else
-            [QfuseEKF(i,:),Pk]=EkfFilter(QfuseEKF(i-1,:),data(i,:),t(i),Vm,Pk);
-            [QfuseMahony(i,:),eInt]=MahonyFilter(QfuseMahony(i-1,:),data(i,:),t(i),Vm,eInt);  
-        end
-        
+
+        [QfuseEKF(i,:),Pk]=EkfFilter(QfuseEKF(i-1,:),data(i,:),t(i),Vm,Pk);
+        [QfuseMahony(i,:),eInt]=MahonyFilter(QfuseMahony(i-1,:),data(i,:),t(i),Vm,eInt);  
+       
     end
 end
+
 figure(1)
 p1(1)=subplot(6,1,1);
 plot(1:m,QfuseHL(:,1),'r',1:m,QfuseEKF(:,1),'g', 1:m,QfuseMahony(:,1),'b',1:m,Q(:,1),'m',1:m,Q_RK4(:,1),'c');
