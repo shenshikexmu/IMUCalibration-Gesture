@@ -4,7 +4,7 @@ function [Q2,eInt]=MahonyFilter(Q1,ImuData,t,Vm,eInt)
 % inspired by    http://blog.csdn.net/luoshi006/article/details/51513580
 % author  Zhang Xin
 
-if nargin<6
+if isempty(eInt)
    eInt=[0,0,0];
 end
 
