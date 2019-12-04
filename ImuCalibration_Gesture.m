@@ -27,7 +27,7 @@ rotation{n+4}=Bg;
 
 [Tm2a,Bm,Vm,mag_strength]=Cal_mag4acc_frame(rotation,fix_point,Tg,Kg);
 
-Set_Bias_Gyro=[0.1,-0.1,0.5];
+Set_Bias_Gyro=[0.1,-0.4,1.5];
 
 See_Gesture( data,Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm,Set_Bias_Gyro);
 
