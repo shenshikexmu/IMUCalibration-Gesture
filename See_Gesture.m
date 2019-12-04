@@ -1,4 +1,4 @@
-function See_Gesture( data,Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm)
+function See_Gesture( data,Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm,Set_Bias_Gyro)
 % show the gesture of sensor, compare different algorithm
 % data is raw data ;  
 % Vm is mag vector in world frame
@@ -8,8 +8,13 @@ m=size(data,1);
 
 %====================================================
 t(1)=0;
-Pk=[];
+Pk_EKF=[];
 eInt=[];
+Pk_EKF_bias=[];
+Bias_Ekf=zeros(1,9);
+Pk_ESKF=[];
+delta_X=zeros(1,6);
+Bg_ESKF=zeros(1,3);
 
 for i=1:m
     
@@ -31,10 +36,12 @@ for i=1:m
     if i==1 
         Q(i,:)  = accMeg2qRichard(data(i,:));  % only gyro
         
-        Q_RK4(i,:)=Q(i,:);             % only gyro in using RK4 updata
-        QfuseHL(i,:)=Q(i,:);           %high low pass filter
-        QfuseEKF(i,:)=Q(i,:);          % EKF filter
-        QfuseMahony(i,:)=Q(i,:);          % Mahony filter 
+        Q_RK4(i,:)=Q(i,:);              % only gyro in using RK4 updata
+        QfuseHL(i,:)=Q(i,:);            % high low pass filter
+        QfuseEKF(i,:)=Q(i,:);           % EKF filter
+        QfuseMahony(i,:)=Q(i,:);        % Mahony filter 
+        QfuseEKF_bias(i,:)=Q(i,:);      % EKF filter to gyro bias
+        QfuseESKF(i,:)=Q(i,:);          % ESKF filter
     else
         Q(i,:)=quaternProd(Q(i-1,:),q(i,:));    %Q(i-1,:)*q(i,:)
                
@@ -42,9 +49,16 @@ for i=1:m
         
         QfuseHL(i,:)=HighLowPassFilter(QfuseHL(i-1,:),data(i,:),t(i));
 
-        [QfuseEKF(i,:),Pk]=EkfFilter(QfuseEKF(i-1,:),data(i,:),t(i),Vm,Pk);
+        [QfuseEKF(i,:),Pk_EKF]=EkfFilter(QfuseEKF(i-1,:),data(i,:),t(i),Vm,Pk_EKF);
+        
         [QfuseMahony(i,:),eInt]=MahonyFilter(QfuseMahony(i-1,:),data(i,:),t(i),Vm,eInt);  
+        
+        data_bias=[0,0,0,0,Set_Bias_Gyro,0,0,0];
+        
+        [QfuseEKF_bias(i,:),Bias_Ekf(i,:),Pk_EKF_bias]=EKF_Gyro_bias(QfuseEKF_bias(i-1,:),Bias_Ekf(i-1,:),data(i,:)+data_bias,t(i),Vm,Pk_EKF_bias);
        
+        [QfuseESKF(i,:),Bg_ESKF(i,:),delta_X(i,:),Pk_ESKF]=ESKF(QfuseESKF(i-1,:),Bg_ESKF(i-1,:),delta_X(i-1,:),data(i,:)+data_bias,t(i),Vm,Pk_ESKF);
+        
     end
 end
 
@@ -74,7 +88,6 @@ plot(1:m,norm_a);
 linkaxes(p1,'x');
 
 
-
 figure('NumberTitle', 'off', 'Name', 'sensor attitude ');
 set(gcf, 'doublebuffer', 'on');
 % writerObj=VideoWriter('J:\out.avi');
@@ -82,32 +95,25 @@ set(gcf, 'doublebuffer', 'on');
 for i = 1:40:m       %show sensor attitude
    
     R0=quatern2rotMat(Q(i,:));                 % only gyro attitude
-    R=quatern2rotMat(Q_RK4(i,:));             % only gyro attitude in using RK4 updata
-    RR=accMag2rotMat(data(i,:));          % acc & mag  attitude
-    RRR=quatern2rotMat(QfuseHL(i,:));     % high low pass filter attitude
-    RRRR=quatern2rotMat(QfuseEKF(i,:));   % EKF filter attitude
-    RRRRR=quatern2rotMat(QfuseMahony(i,:));   % Mahony filter attitude
+    R1=quatern2rotMat(Q_RK4(i,:));             % only gyro attitude in using RK4 updata
+    R2=accMag2rotMat(data(i,:));               % acc & mag  attitude
+    R3=quatern2rotMat(QfuseHL(i,:));           % high low pass filter attitude
+    R4=quatern2rotMat(QfuseEKF(i,:));          % EKF filter attitude
+    R5=quatern2rotMat(QfuseMahony(i,:));       % Mahony filter attitude
+    R6=quatern2rotMat(QfuseEKF_bias(i,:));     % EKF for bias filter attitude
+    R7=quatern2rotMat(QfuseESKF(i,:));         % ESKF filter attitude
 
-    accW=accWorldframe(RRRRR,data(i,:));   %acceleration in world coordinata
-   
-    r0=R0(1,:);                            % x axis coordinate
-    g0=R0(2,:);
-    b0=R0(3,:);
-    r1=R(1,:);                          
-    g1=R(2,:);
-    b1=R(3,:);
-    r2=RR(1,:);        
-    g2=RR(2,:);
-    b2=RR(3,:);
-    r3=RRR(1,:);        
-    g3=RRR(2,:);
-    b3=RRR(3,:);
-    r4=RRRR(1,:);        
-    g4=RRRR(2,:);
-    b4=RRRR(3,:);
-    r5=RRRRR(1,:);        
-    g5=RRRRR(2,:);
-    b5=RRRRR(3,:);
+    accW=accWorldframe(R5,data(i,:));   %acceleration in world coordinata
+    
+    % x                  y                  z    axis coordinate
+    r0=R0(1,:);        g0=R0(2,:);       b0=R0(3,:);
+    r1=R1(1,:);        g1=R1(2,:);       b1=R1(3,:);
+    r2=R2(1,:);        g2=R2(2,:);       b2=R2(3,:);
+    r3=R3(1,:);        g3=R3(2,:);       b3=R3(3,:);
+    r4=R4(1,:);        g4=R4(2,:);       b4=R4(3,:);
+    r5=R5(1,:);        g5=R5(2,:);       b5=R5(3,:);
+    r6=R6(1,:);        g6=R6(2,:);       b6=R6(3,:);
+    r7=R7(1,:);        g7=R7(2,:);       b7=R7(3,:);
     
     plot3([-6,r0(1)-6],[0,r0(2)],[0,r0(3)],'r',...
         [-6,g0(1)-6],[0,g0(2)],[0,g0(3)],'g',...
@@ -133,11 +139,19 @@ for i = 1:40:m       %show sensor attitude
         [9,g5(1)+9],[0,g5(2)],[0,g5(3)],'g',...
         [9,b5(1)+9],[0,b5(2)],[0,b5(3)],'b',...
         ...
-        [13,accW(1)+13],[0,0],[0,0],'r',...
-        [13,13],[0,accW(2)],[0,0],'g',...
-        [13,13],[0,0],[0,accW(3)],'b');
+        [12,r6(1)+12],[0,r6(2)],[0,r6(3)],'r',...
+        [12,g6(1)+12],[0,g6(2)],[0,g6(3)],'g',...
+        [12,b6(1)+12],[0,b6(2)],[0,b6(3)],'b',...
+        ...
+        [15,r7(1)+15],[0,r7(2)],[0,r7(3)],'r',...
+        [15,g7(1)+15],[0,g7(2)],[0,g7(3)],'g',...
+        [15,b7(1)+15],[0,b7(2)],[0,b7(3)],'b',...
+        ...
+        [19,accW(1)+19],[0,0],[0,0],'r',...
+        [19,19],[0,accW(2)],[0,0],'g',...
+        [19,19],[0,0],[0,accW(3)],'b');
     axis equal
-    set(gca,'XLim',[-8 15]);
+    set(gca,'XLim',[-8 23]);
     set(gca,'YLim',[-2.5 2.5]);
     set(gca,'ZLim',[-2.5 2.5]);
     
@@ -150,9 +164,18 @@ for i = 1:40:m       %show sensor attitude
     text(-6.5,0,4,'gyro in RK4 ');
     text(-3,0,4,'acc & mag ');
     text(1,0,4,'highlow pass ');
-    text(5,0,4,'EKF ');
+    text(4,0,4,'EKF ');
     text(7,0,4,'Mahony ');
-    text(10,0,4,'acc in world ');
+    text(10,0,4,'EKF_{bias}');
+    text(13,0,4,'ESKF');
+    text(16,0,4,'acc in world ');
+    
+    text(9,0,-1.8,'Bg_{set}=');
+    text(9,0,-3,num2str(Set_Bias_Gyro'));
+    text(12,0,-1.8,'Bg_{ekf}=' );
+    text(12,0,-3, num2str(roundn(Bias_Ekf(i,4:6)',-4)));
+    text(15,0,-1.8,'Bg_{eskf}=');
+    text(15,0,-3, num2str(roundn(Bg_ESKF(i,:)',-4)));
     drawnow
     
 %     %%%%
@@ -160,6 +183,7 @@ for i = 1:40:m       %show sensor attitude
 %     writeVideo(writerObj,frame);
 end
 %close(writerObj);
+
 
 
 % end
@@ -185,19 +209,17 @@ function ab = quaternProd(a, b)
 end
 
 
-
 function R = quatern2rotMat(q)
-    [rows cols] = size(q);
-    R = zeros(3,3, rows);
-    R(1,1,:) = 2.*q(:,1).^2-1+2.*q(:,2).^2;
-    R(1,2,:) = 2.*(q(:,2).*q(:,3)+q(:,1).*q(:,4));
-    R(1,3,:) = 2.*(q(:,2).*q(:,4)-q(:,1).*q(:,3));
-    R(2,1,:) = 2.*(q(:,2).*q(:,3)-q(:,1).*q(:,4));
-    R(2,2,:) = 2.*q(:,1).^2-1+2.*q(:,3).^2;
-    R(2,3,:) = 2.*(q(:,3).*q(:,4)+q(:,1).*q(:,2));
-    R(3,1,:) = 2.*(q(:,2).*q(:,4)+q(:,1).*q(:,3));
-    R(3,2,:) = 2.*(q(:,3).*q(:,4)-q(:,1).*q(:,2));
-    R(3,3,:) = 2.*q(:,1).^2-1+2.*q(:,4).^2;
+
+    R(1,1) = 2.*q(1)^2-1+2*q(2)^2;
+    R(1,2) = 2*(q(2)*q(3)+q(1)*q(4));
+    R(1,3) = 2*(q(2)*q(4)-q(1)*q(3));
+    R(2,1) = 2*(q(2)*q(3)-q(1)*q(4));
+    R(2,2) = 2*q(1)^2-1+2*q(3)^2;
+    R(2,3) = 2*(q(3)*q(4)+q(1)*q(2));
+    R(3,1) = 2*(q(2)*q(4)+q(1)*q(3));
+    R(3,2) = 2*(q(3)*q(4)-q(1)*q(2));
+    R(3,3) = 2*q(1)^2-1+2*q(4)^2;
 end
 
 
