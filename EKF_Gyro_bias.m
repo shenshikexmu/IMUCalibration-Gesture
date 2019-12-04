@@ -16,9 +16,9 @@ if isempty(Pk1)
     
 end
 
-para_Qk_Q=0.000001;
+para_Qk_Q=0.00001;
 para_Qk_Ba=0;
-para_Qk_Bg=0.000001;
+para_Qk_Bg=0.00001;
 para_Qk_Bm=0;
 
 Qk=diag([[1,1,1,1]*para_Qk_Q,[1,1,1]*para_Qk_Ba,[1,1,1]*para_Qk_Bg,[1,1,1]*para_Qk_Bm]);
