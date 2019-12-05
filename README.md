@@ -39,6 +39,6 @@ https://blog.csdn.net/shenshikexmu/article/details/80013444
  ##### 滤波后的四元数
  
 ![滤波结果](https://img-blog.csdn.net/20180606120722833?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5zaGlrZXhtdQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/10)
-##### 最后一帧姿态
+##### 算法视频
+[![视频](https://v.youku.com/v_show/id_XNDQ1ODc2MzAyNA==.html?spm=a2h0k.11417342.soresults.dtitle)
 
-   ![姿态融合算法](https://img-blog.csdn.net/20180525145419843?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5zaGlrZXhtdQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/10)
