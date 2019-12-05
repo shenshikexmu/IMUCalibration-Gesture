@@ -37,11 +37,15 @@ for i=1:m
         Q(i,:)  = accMeg2qRichard(data(i,:));  % only gyro
         
         Q_RK4(i,:)=Q(i,:);              % only gyro in using RK4 updata
-        QfuseHL(i,:)=Q(i,:);            % high low pass filter
-        QfuseEKF(i,:)=Q(i,:);           % EKF filter
-        QfuseMahony(i,:)=Q(i,:);        % Mahony filter 
-        QfuseEKF_bias(i,:)=Q(i,:);      % EKF filter to gyro bias
-        QfuseESKF(i,:)=Q(i,:);          % ESKF filter
+        
+        Q_random= randn(1,4);
+        Q_random= Q_random/norm(Q_random);
+        QfuseHL(i,:)=Q_random;            % high low pass filter
+        QfuseEKF(i,:)=Q_random;           % EKF filter
+        QfuseMahony(i,:)=Q_random;        % Mahony filter 
+        QfuseEKF_bias(i,:)=Q_random;      % EKF filter to gyro bias
+        QfuseESKF(i,:)=Q_random;          % ESKF filter
+       
     else
         Q(i,:)=quaternProd(Q(i-1,:),q(i,:));    %Q(i-1,:)*q(i,:)
                
