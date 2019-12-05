@@ -36,6 +36,11 @@ https://blog.csdn.net/shenshikexmu/article/details/80013444
    derivation **A Double-Stage Kalman Filter for Orientation Tracking with an Integrated Processor in 9-D IMU**
  #####  high low pass
    high and low pass filter to Gyro atitude with Accelerate & Magnetic
+ #####  ESKF
+   conference **Quaternion kinematics for the error-state Kalman filter**
+   
+   inspired by https://github.com/yuzhou42/ESKF-Attitude-Estimation/blob/master/ESKF%20Attitude%20Algorithm.pdf
+   
  ##### 滤波后的四元数
  
 ![滤波结果](https://img-blog.csdn.net/20180606120722833?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5zaGlrZXhtdQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/10)
