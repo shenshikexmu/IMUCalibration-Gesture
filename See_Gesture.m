@@ -175,7 +175,7 @@ for i = 1:40:m       %show sensor attitude
     text(16,0,4,'acc in world ');
     
     text(9,0,-1.8,'Bg_{set}=');
-    text(9,0,-3,num2str(Set_Bias_Gyro'));
+    text(9,0,-3,num2str(Set_Bias_Gyro));
     text(12,0,-1.8,'Bg_{ekf}=' );
     text(12,0,-3, num2str(roundn(Bias_Ekf(i,4:6)',-4)));
     text(15,0,-1.8,'Bg_{eskf}=');
