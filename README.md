@@ -45,5 +45,5 @@ https://blog.csdn.net/shenshikexmu/article/details/80013444
  
 ![滤波结果](https://img-blog.csdn.net/20180606120722833?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5zaGlrZXhtdQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/10)
 ##### 算法视频
-[![视频]( https://upos-videocovers.acgvideo.com/m191205ws3jv42sk49fd3b3197b592n8_0010.jpg)](https://www.bilibili.com/video/av78142069/)
+[![视频]( https://vthumb.ykimg.com/054106015DE892CC00000163090AD959)](https://www.bilibili.com/video/av78142069/)
 
