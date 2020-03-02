@@ -6,7 +6,7 @@ https://blog.csdn.net/shenshikexmu/article/details/80013444
 
 #### 1.读入数据
 
- load('calfata.mat')
+ load('caldata.mat')
 
 #### 2.运行校正算法
 
