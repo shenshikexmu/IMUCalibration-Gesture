@@ -8,12 +8,17 @@ if nargin<2
 end
 
 B=fix_point(:,1:3)-ones(size(fix_point,1),1)*(mean(fix_point(:,1:3),1));
- options=optimset('TolX',1e-6,'Algorithm','Levenberg-Marquardt',...
- 'Display','iter');
-% options=optimset('Algorithm','Levenberg-Marquardt',...
-% 'Display','iter');
-%a=lsqnonlin(@elliposoid_acc,a0,[],[],options,B(:,1:3),zeros(size(B,1),1));
-[a,resnorm]=lsqnonlin(@elliposoid_acc,a0,[],[],options,B(:,1:3));
+
+% options=optimset('TolX',1e-6,'TolFun',1e-6,'Algorithm','Levenberg-Marquardt',...
+%  'Display','iter','MaxIter',50);
+% 
+% [a,resnorm]=lsqnonlin(@elliposoid_acc,a0,[],[],options,B(:,1:3));
+fprintf('Calibration Accelerometer:\n');
+TolX=1e-6;
+TolFun=1e-6;
+MaxIter=50;
+[a,resnorm]=Optimize_my_LM(@elliposoid_acc,a0,B(:,1:3),TolX,TolFun,MaxIter);
+
 
 
 Ta=[1 , -a(1),  a(2);...
