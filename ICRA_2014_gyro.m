@@ -10,9 +10,15 @@ end
 
 % options=optimset('Algorithm','Levenberg-Marquardt',...
 % 'Display','iter','TolX',1e-4,'MaxIter',10);
-options=optimset('Algorithm','Levenberg-Marquardt',...
-'Display','iter','TolX',1e-5,'MaxIter',18);
-a=lsqnonlin(@rotation_gyro,a0,[],[],options,rotation);
+% options=optimset('Algorithm','Levenberg-Marquardt',...
+% 'Display','iter','TolX',1e-5,'MaxIter',18);
+% a=lsqnonlin(@rotation_gyro,a0,[],[],options,rotation);
+
+fprintf('Calibration Gyroscope:\n');
+TolX=1e-5;
+TolFun=0;
+MaxIter=18;
+a=Optimize_my_LM(@rotation_gyro,a0,rotation,TolX,TolFun,MaxIter);
 
 Tg=[   1  , -a(1) ,  a(2) ;...
      a(3) ,   1   , -a(4) ;...
