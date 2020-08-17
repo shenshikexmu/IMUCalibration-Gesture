@@ -41,6 +41,15 @@ https://blog.csdn.net/shenshikexmu/article/details/80013444
    
    inspired by https://github.com/yuzhou42/ESKF-Attitude-Estimation/blob/master/ESKF%20Attitude%20Algorithm.pdf
    
+   
+ #### 6.LM算法
+
+ #####  Optimize_my_LM
+   Levenberg-Marquardt algorithm written by myself 
+   conference   https://ww2.mathworks.cn/help/optim/ug/least-squares-model-fitting-algorithms.html#brrx6vm
+   
+  
+
  ##### 滤波后的四元数
  
 ![滤波结果](https://img-blog.csdn.net/20180606120722833?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5zaGlrZXhtdQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/10)
