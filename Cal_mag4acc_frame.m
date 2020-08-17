@@ -7,9 +7,16 @@ end
 n=size(rotation,1);
 rotation{n+1}=Tg;
 rotation{n+2}=Kg;
- options=optimset('TolX',1e-6,'Algorithm','Levenberg-Marquardt',...
- 'Display','iter');
-[a]=lsqnonlin(@mag_in_diff_gesture,a0,[],[],options,rotation);
+
+%  options=optimset('TolX',1e-6,'Algorithm','Levenberg-Marquardt',...
+%  'Display','iter');
+% [a]=lsqnonlin(@mag_in_diff_gesture,a0,[],[],options,rotation);
+
+fprintf('Calibration Magnetometer:\n');
+TolX=1e-6;
+TolFun=0;
+MaxIter=inf;
+a=Optimize_my_LM(@mag_in_diff_gesture,a0,rotation,TolX,TolFun,MaxIter);
 
 Tm2a=[a(1)   , a(2),  a(3);...
     a(4) ,  a(5)   , a(6);...
