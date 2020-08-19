@@ -77,11 +77,11 @@ function Jacobi=Get_Jacobi(Loss_fun,xk,data)
 
 scale=1e-4;
 
-%Ek=Loss_fun(xk,data);
+Ek=Loss_fun(xk,data);
 
 for i=1:length(xk)
     x_temp1=xk;
-    x_temp2=xk;
+   % x_temp2=xk;
     if abs(x_temp1(i))>scale
   
         delta=x_temp1(i)*scale;
@@ -89,15 +89,14 @@ for i=1:length(xk)
         delta=scale;
     end
     x_temp1(i)=x_temp1(i)+delta;
-    x_temp2(i)=x_temp2(i)-delta;
+  %  x_temp2(i)=x_temp2(i)-delta;
 
     E_temp1=Loss_fun(x_temp1,data);
 
-    E_temp2=Loss_fun(x_temp2,data);
+  %  E_temp2=Loss_fun(x_temp2,data);
 
-    Jacobi(:,i)=(E_temp1-E_temp2)/delta/2;
-
-end
+    Jacobi(:,i)=(E_temp1-Ek)/delta;
 
 end
 
+end
