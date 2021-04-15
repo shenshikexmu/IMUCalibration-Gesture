@@ -18,7 +18,7 @@ found=logical(norm(g)<=TolFun);
 mou=tao*max(diag(Jacobi'*Jacobi));
 
 k=0;
-while (~found && k<MaxIter+1)
+while (~found || k<MaxIter+1)
     
     %delta_x=-(Jacobi'*Jacobi+mou*eye(size(a0,2)))\Jacobi'*Ek;    
     
