@@ -24,7 +24,13 @@ Qp=[ 1    , -wx/2 , -wy/2 , -wz/2  ;...
 Qp=Qp/norm(Qp);
  
 delta_theta=norm([wx,wy,wz]);
-u= [wx,wy,wz]'/delta_theta;
+
+if delta_theta==0
+    R_u_delta_theta=eye(3);
+else
+    u= [wx,wy,wz]'/delta_theta;
+    R_u_delta_theta=eye(3)-Skew_symmetric(u)*sin(delta_theta)+Skew_symmetric(u)*Skew_symmetric(u)*(1-cos(delta_theta));
+end
 
 R_u_delta_theta=eye(3)-Skew_symmetric(u)*sin(delta_theta)+Skew_symmetric(u)*Skew_symmetric(u)*(1-cos(delta_theta));
 
