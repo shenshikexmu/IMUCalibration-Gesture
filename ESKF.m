@@ -32,8 +32,6 @@ else
     R_u_delta_theta=eye(3)-Skew_symmetric(u)*sin(delta_theta)+Skew_symmetric(u)*Skew_symmetric(u)*(1-cos(delta_theta));
 end
 
-R_u_delta_theta=eye(3)-Skew_symmetric(u)*sin(delta_theta)+Skew_symmetric(u)*Skew_symmetric(u)*(1-cos(delta_theta));
-
 F_delta_X=[R_u_delta_theta, -eye(3)*t;...
            zeros(3,3),       eye(3) ];
 Para_delta_theta=0.000001;
