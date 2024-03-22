@@ -273,8 +273,11 @@ function q = qUtoV(u, v)        %two vetor rotation to quaternions
 nu = u/norm(u);
 nv = v/norm(v);
 
-if (u*v' == -1)
-    q = [0, [1,0,0]];
+if norm(nv1+nv2)==0
+    v3=[nv1(2),nv1(3),nv1(1)];
+    v4=cross(v1,v3);
+    nv4=v4/norm(v4);
+    q = [0, [nv4(1),nv4(2),nv4(3)]];
 else
     half = (nu + nv)/norm(nu + nv);
     q = [nu*half',cross(nu, half)];
