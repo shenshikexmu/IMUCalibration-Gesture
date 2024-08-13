@@ -273,9 +273,9 @@ function q = qUtoV(u, v)        %two vetor rotation to quaternions
 nu = u/norm(u);
 nv = v/norm(v);
 
-if norm(nv1+nv2)==0
-    v3=[nv1(2),nv1(3),nv1(1)];
-    v4=cross(v1,v3);
+if norm(nu+nv)==0
+    v3=[nu(2),nu(3),nu(1)];
+    v4=cross(nu,v3);
     nv4=v4/norm(v4);
     q = [0, [nv4(1),nv4(2),nv4(3)]];
 else
