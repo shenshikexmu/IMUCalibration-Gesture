@@ -11,13 +11,14 @@ calibration for Imu and show gesture
 https://blog.csdn.net/shenshikexmu/article/details/80013444
 
 #### 1.读入数据
-
- load('caldata.mat')
+'''
+load('caldata.mat')
+'''
 
 #### 2.运行校正算法
-
-   [Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm,mag_strength]=ImuCalibration_Gesture(cal_data)
-
+'''
+[Ta,Ka,Ba,Tg,Kg,Bg,Tm2a,Bm,Vm,mag_strength]=ImuCalibration_Gesture(cal_data)
+'''
 
 #### 3.校正部分
 
